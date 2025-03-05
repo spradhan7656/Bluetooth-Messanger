@@ -25,7 +25,9 @@ import com.myapp.bluetoothmessanger.presentaton.BluetoothUiState
 fun DeviceScreen(
     state: BluetoothUiState,
     onStartScan:()->Unit,
-    onStopScan:()->Unit
+    onStopScan:()->Unit,
+    onDeviceClick:(BluethoohDevices)->Unit,
+    onStartServer:()->Unit
 ) {
    Column(
        modifier = Modifier.fillMaxSize()
@@ -34,7 +36,7 @@ fun DeviceScreen(
        BlueToothDeviceList(
            pairedDevices = state.pairedDevices,
            scannedDevices = state.scannedDevices,
-           onClick = {},
+           onClick = onDeviceClick,
            modifier = Modifier.fillMaxWidth()
                .weight(1f)
        )
@@ -52,6 +54,11 @@ fun DeviceScreen(
                onClick = onStopScan
            ) {
                Text(text = "Stop Scan")
+           }
+           Button(
+               onClick = onStartServer
+           ) {
+               Text(text = "Start Server")
            }
        }
    }

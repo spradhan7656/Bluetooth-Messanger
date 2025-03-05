@@ -13,10 +13,16 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -58,17 +64,47 @@ class MainActivity : ComponentActivity() {
                 val state by viewModel.state.collectAsState()
                 val coroutineScope = rememberCoroutineScope()
 
+
+                LaunchedEffect(key1 = state.errorMessage) {
+                    state.errorMessage?.let { message->
+                        Toast.makeText(applicationContext,message,Toast.LENGTH_LONG).show()
+                    }
+                }
+
+                LaunchedEffect(key1 = state.isConnected) {
+                    if(state.isConnected){
+                        Toast.makeText(applicationContext,"You are connected",Toast.LENGTH_LONG).show()
+                    }
+                }
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    DeviceScreen(
-                        state = state,
-                        onStartScan = {
-                            coroutineScope.launch { handleScanAction(viewModel) }
-                        },
-                        onStopScan = viewModel::stopScan
-                    )
+
+                    when{
+                        state.isConnecting->{
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ){
+                                CircularProgressIndicator()
+                                Text(text = "Connecting...")
+                            }
+                        }else->{
+                        DeviceScreen(
+                            state = state,
+                            onStartScan = {
+                                coroutineScope.launch { handleScanAction(viewModel) }
+                            },
+                            onStopScan = viewModel::stopScan,
+                            onDeviceClick = viewModel::connectedToDevice,
+                            onStartServer = viewModel::waitForInComingConnections
+                        )
+                        }
+                    }
+
+
                 }
 
                 LaunchedEffect(Unit) {
