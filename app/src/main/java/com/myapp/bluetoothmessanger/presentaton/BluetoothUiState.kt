@@ -1,6 +1,7 @@
 package com.myapp.bluetoothmessanger.presentaton
 
 import com.myapp.bluetoothmessanger.domain.chat.BluethoohDevices
+import com.myapp.bluetoothmessanger.domain.chat.BluetoothMessage
 
 
 data class BluetoothUiState(
@@ -10,7 +11,8 @@ data class BluetoothUiState(
     val isConnecting:Boolean = false,
 
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val message : List<BluetoothMessage> = emptyList()
 
 
 )

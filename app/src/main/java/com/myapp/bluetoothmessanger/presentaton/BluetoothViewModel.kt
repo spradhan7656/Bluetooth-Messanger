@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -34,7 +35,8 @@ class BluetoothViewModel @Inject constructor(
             scannedDevices = scannedDevices,
             pairedDevices = pairedDevices,
             isLoading = state.isLoading,
-            errorMessage = state.errorMessage
+            errorMessage = state.errorMessage,
+            message = if (state.isConnected) state.message else emptyList()
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _state.value)
 
@@ -61,6 +63,17 @@ class BluetoothViewModel @Inject constructor(
         deviceConnectionJob = bluetoothController
             .startBluetoothServer()
             .listen()
+    }
+
+    fun sendMessage(message:String){
+        viewModelScope.launch {
+            val bluetoothMessage = bluetoothController.trySendMessage(message)
+            if (bluetoothMessage!=null){
+                _state.update { it.copy(
+                    message = it.message + bluetoothMessage
+                ) }
+            }
+        }
     }
 
     fun startScan() {
@@ -106,6 +119,13 @@ class BluetoothViewModel @Inject constructor(
                         errorMessage = null
                     ) }
                 }
+
+                is ConnectionResult.TransferSucceeded->{
+                    _state.update {it.copy(
+                        message = it.message + result.message
+                    ) }
+                }
+
                 is ConnectionResult.Error->{
                     _state.update { it.copy(
                         isConnected = false,

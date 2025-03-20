@@ -18,10 +18,13 @@ interface BluetoothController {
 
     fun startBluetoothServer(): Flow<ConnectionResult>
 
+    suspend fun trySendMessage(message:String):BluetoothMessage?
+
     fun connectToDevice(devices: BluethoohDevices):Flow<ConnectionResult>
 
     fun closeConnection()
 
     fun release()
     fun updatePairedDevices()
+
 }
